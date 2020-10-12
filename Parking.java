@@ -15,7 +15,7 @@ public class Parking
 
     private final double PRECIO_BASE_REGULAR = 2;
     private final double PRECIO_MEDIA_REGULAR_HASTA11 = 3;
-    private final double PRECIO_MEDIA_REGULAR_DESOPUES11 = 5;
+    private final double PRECIO_MEDIA_REGULAR_DESPUES11 = 5;
 
     private final double HORA_INICIO_ENTRADA_TEMPRANA = 6 * 60;
     private final double HORA_FIN_ENTRADA_TEMPRANA = 8 * 60 + 30;
@@ -27,7 +27,7 @@ public class Parking
     private final double PRECIO_MEDIA_COMERCIAL = 3;
 
     private String nombre;
-    private String cliente;
+    private int cliente;
     private double importeTotal;
     private int regular;
     private int comercial;
@@ -42,7 +42,7 @@ public class Parking
      */
     public Parking(String queNombre) {
         nombre = queNombre;
-        cliente = "";
+        cliente = 0;
         importeTotal = 0;
         regular = 0;
         comercial = 0;
@@ -70,7 +70,6 @@ public class Parking
         nombre = queNombre;
     }
 
-
     /**
      *  Recibe cuatro parámetros que supondremos correctos:
      *    tipoTarifa - un carácter 'R' o 'C'
@@ -88,11 +87,94 @@ public class Parking
      *    (leer enunciado del ejercicio)
      */
     public void facturarCliente(char tipoTarifa, int entrada, int salida, int dia) {
-        
-       
+        double importe = 0;
+        String tarifaAAplicar;
+        if (tipoTarifa == COMERCIAL){
+            tarifaAAplicar = "COMERCIAL";
+        }
+        else if(tipoTarifa == REGULAR && (entrada < 600 || entrada > 830 ||
+            salida < 1500 || salida > 1800) ){
+            tarifaAAplicar = "REGULAR";
+        }
+        else{
+            tarifaAAplicar = "REGULAR Y TEMPRANA";
+        }
+        cliente ++;
+        switch(tipoTarifa){
+            case REGULAR:
+            regular ++;
+            if(entrada >= 600 && entrada <= 830 && salida >= 1500 && salida <= 1800) {
+                importe = 15;
+            }
+            else{
+                if (entrada - 1100 > 0 && salida - 1100 > 0){
+                    importe = PRECIO_BASE_REGULAR + 
+                    ((salida - entrada) / 100) * 2 * PRECIO_MEDIA_REGULAR_HASTA11;
+                    if(salida - (salida / 100 * 100) > 30){
+                        importe += PRECIO_MEDIA_REGULAR_HASTA11;
+                    }
+                }
+                else if (entrada - 1100 < 0 && salida - 1100 > 0){
+                    importe = PRECIO_BASE_REGULAR +
+                    (salida - entrada) / 100 + PRECIO_MEDIA_REGULAR_DESPUES11;
+                    if(salida - (salida / 100 * 100) > 0){
+                        importe += PRECIO_MEDIA_REGULAR_DESPUES11;
+                    }
+                }
+                else{
+                    importe = PRECIO_BASE_REGULAR + 
+                    ((1100 - entrada) / 100) * 2 * PRECIO_MEDIA_REGULAR_HASTA11 + 
+                    (salida - 1100 / 100) * 2 * PRECIO_MEDIA_REGULAR_DESPUES11;
+                    if(entrada - (entrada / 100 * 100) > 0){
+                        importe += PRECIO_MEDIA_REGULAR_HASTA11;
 
-        
+                    }
+                    if(salida - (salida / 100 * 100) > 0){
+                        importe += PRECIO_MEDIA_REGULAR_DESPUES11;
+                    }
+                }
+            }
+            break;
+            default:
+            comercial ++;
+            importe = PRECIO_PRIMERAS3_COMERCIAL;
+            if (salida - entrada > 3){
+                importe += (salida - entrada - 300) / 100 *
+                2 * PRECIO_MEDIA_COMERCIAL;
+                if((salida - entrada) -((salida - entrada) / 100 * 100) > 0){
+                    importe += PRECIO_MEDIA_COMERCIAL;
+                }
+            }
 
+            if (comercial == 1) {
+                importeMaximoComercial = importe;
+                clientesMaximoComercial = cliente;
+            }
+            else{
+                if (importeMaximoComercial > importe){
+                    importeMaximoComercial = importe;
+                    clientesMaximoComercial = cliente;
+                }
+            }
+            break;
+        }
+        if (dia == 1){
+            clientesLunes ++; 
+        }
+        else if(dia == 6){
+            clientesSabado ++;
+        }
+        else if(dia == 7){
+            clientesDomingo ++;
+        }
+        importeTotal += importe;
+        System.out.println("*************Parking de Pedro***************" + 
+            "\nCliente nº: " + cliente +
+            "\nHora entrada: " + (entrada / 100) + ":" + (entrada - (entrada / 100 * 100))  + 
+            "\nHora salida: " + (salida / 100) + ":" + (salida - (salida / 100 * 100))  + 
+            "\nTarifa a aplicar: " + tarifaAAplicar +
+            "\nImporte a pagar: " + importe + "€" +
+            "\n****************************");
     }
 
     /**
@@ -102,17 +184,36 @@ public class Parking
      *  
      */
     public void printEstadísticas() {
-         
+        System.out.println("Importe total entre todos los clientes: " + importeTotal +
+            "\nNº clientes tarifa regular: " + regular +
+            "\nNº clientes tarifa comercial: " + comercial +
+            "\nCliente tarifa COMERCIAL con factura máxima fue el "+ cliente + 
+            "\n y pagó" + importeMaximoComercial + "€");
     }
 
     /**
      *  Calcula y devuelve un String que representa el nombre del día
      *  en el que más clientes han utilizado el parking - "SÁBADO"   "DOMINGO" o  "LUNES"
      */
-    public void diaMayorNumeroClientes() {
-
-        
-
+    public String diaMayorNumeroClientes() {
+        String MayorNumeroClientes;
+        if (clientesLunes > clientesSabado){
+            if(clientesLunes > clientesDomingo){
+                MayorNumeroClientes = "LUNES";
+            }
+            else{
+                MayorNumeroClientes = "DOMINGO";
+            }
+        }
+        else if (clientesSabado > clientesDomingo){
+            MayorNumeroClientes = "SÁBADO";
+        }
+        else if (clientesDomingo > clientesDomingo) {
+            MayorNumeroClientes = "DOMINGO";
+        }
+        else {
+            MayorNumeroClientes = "Indeterminado";
+        }
+        return MayorNumeroClientes;
     }
-
 }

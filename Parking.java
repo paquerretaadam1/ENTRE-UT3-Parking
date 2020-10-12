@@ -114,9 +114,9 @@ public class Parking
                         importe += PRECIO_MEDIA_REGULAR_HASTA11;
                     }
                 }
-                else if (entrada - 1100 < 0 && salida - 1100 > 0){
+                else if (entrada - 1100 < 0 && salida - 1100 < 0){
                     importe = PRECIO_BASE_REGULAR +
-                    (salida - entrada) / 100 + PRECIO_MEDIA_REGULAR_DESPUES11;
+                    (salida - entrada) / 100 * PRECIO_MEDIA_REGULAR_DESPUES11;
                     if(salida - (salida / 100 * 100) > 0){
                         importe += PRECIO_MEDIA_REGULAR_DESPUES11;
                     }
@@ -124,10 +124,9 @@ public class Parking
                 else{
                     importe = PRECIO_BASE_REGULAR + 
                     ((1100 - entrada) / 100) * 2 * PRECIO_MEDIA_REGULAR_HASTA11 + 
-                    (salida - 1100 / 100) * 2 * PRECIO_MEDIA_REGULAR_DESPUES11;
+                    ((salida - 1100) / 100) * 2 * PRECIO_MEDIA_REGULAR_DESPUES11;
                     if(entrada - (entrada / 100 * 100) > 0){
                         importe += PRECIO_MEDIA_REGULAR_HASTA11;
-
                     }
                     if(salida - (salida / 100 * 100) > 0){
                         importe += PRECIO_MEDIA_REGULAR_DESPUES11;
@@ -151,7 +150,7 @@ public class Parking
                 clientesMaximoComercial = cliente;
             }
             else{
-                if (importeMaximoComercial > importe){
+                if (importeMaximoComercial < importe){
                     importeMaximoComercial = importe;
                     clientesMaximoComercial = cliente;
                 }

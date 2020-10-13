@@ -89,71 +89,76 @@ public class Parking
     public void facturarCliente(char tipoTarifa, int entrada, int salida, int dia) {
         double importe = 0;
         String tarifaAAplicar;
-        if (tipoTarifa == COMERCIAL){
-            tarifaAAplicar = "COMERCIAL";
-        }
-        else if(tipoTarifa == REGULAR && (entrada < 600 || entrada > 830 ||
-            salida < 1500 || salida > 1800) ){
-            tarifaAAplicar = "REGULAR";
-        }
-        else{
-            tarifaAAplicar = "REGULAR Y TEMPRANA";
-        }
+        String entradaString;
+        String salidaString;
+
+        int horaEntrada = entrada / 100;
+        int minutosEntrada = entrada % 100;
+        int entradaEnMinutos = horaEntrada * 60 + minutosEntrada;
+
+        int horaSalida = salida / 100;
+        int minutosSalida = salida % 100;
+        int salidaEnMinutos = horaSalida * 60 + minutosSalida;
+
+        int tiempoEstacionado = salidaEnMinutos - entradaEnMinutos;
+        int periodosEstacionado = tiempoEstacionado / 30;
+
+        int tiempoEstacionadoAntes11 = 660 - entradaEnMinutos;
+        int periodosEstacionadoAntes11 = tiempoEstacionadoAntes11 / 30;
+        int minutosEstacionadoAntes11Extra = tiempoEstacionadoAntes11 % 60;
+        int tiempoEstacionadoDespues11 = salidaEnMinutos - 660;
+        int periodosEstacionadoDespues11 = tiempoEstacionadoDespues11 / 30;
+        int minutosEstacionadoDespues11Extra = tiempoEstacionadoDespues11 % 60;
         cliente ++;
+
         switch(tipoTarifa){
             case REGULAR:
-            regular ++;
-            if(entrada >= 600 && entrada <= 830 && salida >= 1500 && salida <= 1800) {
+
+            regular ++;         
+
+            if(entradaEnMinutos >= HORA_INICIO_ENTRADA_TEMPRANA &&
+            entradaEnMinutos <= HORA_FIN_ENTRADA_TEMPRANA
+            && salidaEnMinutos >= HORA_INICIO_SALIDA_TEMPRANA &&
+            salidaEnMinutos <= HORA_FIN_SALIDA_TEMPRANA) {
+                tarifaAAplicar = "REGULAR Y TEMPRANA";
                 importe = 15;
             }
             else{
-                if (entrada - 1100 > 0 && salida - 1100 > 0){
-                    importe = PRECIO_BASE_REGULAR + 
-                    ((salida - entrada) / 100) * 2 * PRECIO_MEDIA_REGULAR_HASTA11;
-                    if(salida - (salida / 100 * 100) > 30){
-                        importe += PRECIO_MEDIA_REGULAR_HASTA11;
-                    }
+                importe = PRECIO_BASE_REGULAR;
+                tarifaAAplicar = "REGULAR";
+                if (entradaEnMinutos < 660 && salidaEnMinutos < 660){
+                    importe += periodosEstacionado * PRECIO_MEDIA_REGULAR_HASTA11;
+
                 }
-                else if (entrada - 1100 < 0 && salida - 1100 < 0){
-                    importe = PRECIO_BASE_REGULAR +
-                    (salida - entrada) / 100 * PRECIO_MEDIA_REGULAR_DESPUES11;
-                    if(salida - (salida / 100 * 100) > 0){
-                        importe += PRECIO_MEDIA_REGULAR_DESPUES11;
-                    }
+                else if (entradaEnMinutos >= 660){
+                    importe += periodosEstacionado * PRECIO_MEDIA_REGULAR_DESPUES11;
+
                 }
                 else{
-                    importe = PRECIO_BASE_REGULAR + 
-                    ((1100 - entrada) / 100) * 2 * PRECIO_MEDIA_REGULAR_HASTA11 + 
-                    ((salida - 1100) / 100) * 2 * PRECIO_MEDIA_REGULAR_DESPUES11;
-                    if(entrada - (entrada / 100 * 100) > 0){
-                        importe += PRECIO_MEDIA_REGULAR_HASTA11;
-                    }
-                    if(salida - (salida / 100 * 100) > 0){
-                        importe += PRECIO_MEDIA_REGULAR_DESPUES11;
-                    }
+                    importe += periodosEstacionadoAntes11
+                    * PRECIO_MEDIA_REGULAR_HASTA11 + 
+                    periodosEstacionadoDespues11 * PRECIO_MEDIA_REGULAR_DESPUES11;
+                    
                 }
             }
             break;
             default:
+            tarifaAAplicar = "COMERCIAL";
             comercial ++;
             importe = PRECIO_PRIMERAS3_COMERCIAL;
-            if (salida - entrada > 3){
-                importe += (salida - entrada - 300) / 100 *
-                2 * PRECIO_MEDIA_COMERCIAL;
-                if((salida - entrada) -((salida - entrada) / 100 * 100) > 0){
-                    importe += PRECIO_MEDIA_COMERCIAL;
-                }
+
+            if (tiempoEstacionado > 3){
+                importe +=  ((periodosEstacionado - 6) *
+                    PRECIO_MEDIA_COMERCIAL);
             }
 
             if (comercial == 1) {
                 importeMaximoComercial = importe;
                 clientesMaximoComercial = cliente;
             }
-            else{
-                if (importeMaximoComercial < importe){
-                    importeMaximoComercial = importe;
-                    clientesMaximoComercial = cliente;
-                }
+            else if (importeMaximoComercial < importe){
+                clientesMaximoComercial = cliente;
+                importeMaximoComercial = importe;
             }
             break;
         }
@@ -167,10 +172,22 @@ public class Parking
             clientesDomingo ++;
         }
         importeTotal += importe;
+        if(minutosEntrada < 10){
+            entradaString = "0" + minutosEntrada;
+        }
+        else{
+            entradaString = "" + minutosEntrada;
+        }
+        if(minutosSalida < 10){
+            salidaString = "0" + minutosSalida;
+        }
+        else{
+            salidaString = "" + minutosSalida;
+        }
         System.out.println("*************Parking de Pedro***************" + 
             "\nCliente nº: " + cliente +
-            "\nHora entrada: " + (entrada / 100) + ":" + (entrada - (entrada / 100 * 100))  + 
-            "\nHora salida: " + (salida / 100) + ":" + (salida - (salida / 100 * 100))  + 
+            "\nHora entrada: " + horaEntrada + ":" + entradaString  + 
+            "\nHora salida: " + horaSalida + ":" + salidaString  + 
             "\nTarifa a aplicar: " + tarifaAAplicar +
             "\nImporte a pagar: " + importe + "€" +
             "\n****************************");
@@ -183,11 +200,13 @@ public class Parking
      *  
      */
     public void printEstadísticas() {
-        System.out.println("Importe total entre todos los clientes: " + importeTotal +
+        System.out.println("****************************************" + 
+            "\nImporte total entre todos los clientes: " + importeTotal +
             "\nNº clientes tarifa regular: " + regular +
             "\nNº clientes tarifa comercial: " + comercial +
-            "\nCliente tarifa COMERCIAL con factura máxima fue el "+ cliente + 
-            "\n y pagó" + importeMaximoComercial + "€");
+            "\nCliente tarifa COMERCIAL con factura máxima fue el "+ clientesMaximoComercial + 
+            "\n y pagó " + importeMaximoComercial + "€" +
+            "\n****************************************");
     }
 
     /**
@@ -211,7 +230,7 @@ public class Parking
             MayorNumeroClientes = "DOMINGO";
         }
         else {
-            MayorNumeroClientes = "Indeterminado";
+            MayorNumeroClientes = "COINCIDEN";
         }
         return MayorNumeroClientes;
     }

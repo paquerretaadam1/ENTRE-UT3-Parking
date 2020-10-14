@@ -94,21 +94,20 @@ public class Parking
 
         int horaEntrada = entrada / 100;
         int minutosEntrada = entrada % 100;
-        int entradaEnMinutos = horaEntrada * 60 + minutosEntrada;
+        int entradaEnMinutos = horaEntrada * 60 + minutosEntrada;                  
 
         int horaSalida = salida / 100;
         int minutosSalida = salida % 100;
         int salidaEnMinutos = horaSalida * 60 + minutosSalida;
 
-        int tiempoEstacionado = salidaEnMinutos - entradaEnMinutos;
-        int periodosEstacionado = tiempoEstacionado / 30;
+        int tiempoEstacionado = salidaEnMinutos - entradaEnMinutos;                //Tiempo aparcado en minutos
+        int periodosEstacionado = tiempoEstacionado / 30;                          //Divido entre 30 porque es el intervalo de tiempo por el que se cobra una vez la tarifa
 
-        int tiempoEstacionadoAntes11 = 660 - entradaEnMinutos;
-        int periodosEstacionadoAntes11 = tiempoEstacionadoAntes11 / 30;
-        int minutosEstacionadoAntes11Extra = tiempoEstacionadoAntes11 % 60;
-        int tiempoEstacionadoDespues11 = salidaEnMinutos - 660;
-        int periodosEstacionadoDespues11 = tiempoEstacionadoDespues11 / 30;
-        int minutosEstacionadoDespues11Extra = tiempoEstacionadoDespues11 % 60;
+        int tiempoEstacionadoAntes11 = 660 - entradaEnMinutos;                     //Tiempo que está aparcado hasta antes de las 11h                 
+        int periodosEstacionadoAntes11 = tiempoEstacionadoAntes11 / 30;            //Nº de periodos antes de las 11h    
+        int tiempoEstacionadoDespues11 = salidaEnMinutos - 660;                    //Tiempo que está aparcado hasta antes de las 11h
+        int periodosEstacionadoDespues11 = tiempoEstacionadoDespues11 / 30;        //Nº de periodos antes de las 11h
+
         cliente ++;
 
         switch(tipoTarifa){
@@ -138,7 +137,7 @@ public class Parking
                     importe += periodosEstacionadoAntes11
                     * PRECIO_MEDIA_REGULAR_HASTA11 + 
                     periodosEstacionadoDespues11 * PRECIO_MEDIA_REGULAR_DESPUES11;
-                    
+
                 }
             }
             break;

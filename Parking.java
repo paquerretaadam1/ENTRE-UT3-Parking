@@ -10,6 +10,7 @@
  */
 public class Parking
 {
+    //Constantes
     private final char REGULAR = 'R';
     private final char COMERCIAL = 'C';
 
@@ -26,6 +27,7 @@ public class Parking
     private final double PRECIO_PRIMERAS3_COMERCIAL = 5;
     private final double PRECIO_MEDIA_COMERCIAL = 3;
 
+    //Atributos
     private String nombre;
     private int cliente;
     private double importeTotal;
@@ -87,19 +89,23 @@ public class Parking
      *    (leer enunciado del ejercicio)
      */
     public void facturarCliente(char tipoTarifa, int entrada, int salida, int dia) {
+        //Variable locales
         double importe = 0;
+
+        //Variables locales para el print final
         String tarifaAAplicar;
         String entradaString;
         String salidaString;
 
+        //Conversión a minutos Hora entrada y salida
         int horaEntrada = entrada / 100;
         int minutosEntrada = entrada % 100;
-        int entradaEnMinutos = horaEntrada * 60 + minutosEntrada;                  
-
+        int entradaEnMinutos = horaEntrada * 60 + minutosEntrada;
         int horaSalida = salida / 100;
         int minutosSalida = salida % 100;
         int salidaEnMinutos = horaSalida * 60 + minutosSalida;
 
+        //Cálculos complejos en variables para evitar condiciones y operaciones largas en el código 
         int tiempoEstacionado = salidaEnMinutos - entradaEnMinutos;                //Tiempo aparcado en minutos
         int periodosEstacionado = tiempoEstacionado / 30;                          //Divido entre 30 porque es el intervalo de tiempo por el que se cobra una vez la tarifa
 
@@ -113,14 +119,15 @@ public class Parking
         switch(tipoTarifa){
             case REGULAR:
 
-            regular ++;         
+            regular ++;
 
+            //Cálculo importe
             if(entradaEnMinutos >= HORA_INICIO_ENTRADA_TEMPRANA &&
             entradaEnMinutos <= HORA_FIN_ENTRADA_TEMPRANA
             && salidaEnMinutos >= HORA_INICIO_SALIDA_TEMPRANA &&
             salidaEnMinutos <= HORA_FIN_SALIDA_TEMPRANA) {
                 tarifaAAplicar = "REGULAR Y TEMPRANA";
-                importe = 15;
+                importe = PRECIO_TARIFA_PLANA_REGULAR;
             }
             else{
                 importe = PRECIO_BASE_REGULAR;
@@ -142,8 +149,11 @@ public class Parking
             }
             break;
             default:
+
             tarifaAAplicar = "COMERCIAL";
             comercial ++;
+
+            //Cálculo importe
             importe = PRECIO_PRIMERAS3_COMERCIAL;
 
             if (tiempoEstacionado > 3){
@@ -151,6 +161,7 @@ public class Parking
                     PRECIO_MEDIA_COMERCIAL);
             }
 
+            //ImporteMáximo
             if (comercial == 1) {
                 importeMaximoComercial = importe;
                 clientesMaximoComercial = cliente;
@@ -161,6 +172,8 @@ public class Parking
             }
             break;
         }
+
+        //Contar cuantos clientes han venido cada día
         if (dia == 1){
             clientesLunes ++; 
         }
@@ -170,7 +183,11 @@ public class Parking
         else if(dia == 7){
             clientesDomingo ++;
         }
+
+        //Importe Total
         importeTotal += importe;
+
+        //Comparador de si los minutos a los que sale/entra son menores a 10 para agregarles un "0" para el println
         if(minutosEntrada < 10){
             entradaString = "0" + minutosEntrada;
         }
@@ -183,6 +200,7 @@ public class Parking
         else{
             salidaString = "" + minutosSalida;
         }
+
         System.out.println("*************Parking de Pedro***************" + 
             "\nCliente nº: " + cliente +
             "\nHora entrada: " + horaEntrada + ":" + entradaString  + 
@@ -213,6 +231,7 @@ public class Parking
      *  en el que más clientes han utilizado el parking - "SÁBADO"   "DOMINGO" o  "LUNES"
      */
     public String diaMayorNumeroClientes() {
+        
         String MayorNumeroClientes;
         if (clientesLunes > clientesSabado){
             if(clientesLunes > clientesDomingo){
